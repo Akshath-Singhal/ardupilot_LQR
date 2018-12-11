@@ -223,7 +223,7 @@ const AP_Param::Info Plane::var_info[] = {
     // @Param: NAV_CONTROLLER
     // @DisplayName: Navigation controller selection
     // @Description: Which navigation controller to enable. Currently the only navigation controller available is L1. From time to time other experimental controllers will be added which are selected using this parameter.
-    // @Values: 0:Default,1:L1Controller
+    // @Values: 0:Default,1:L1Controller,2:LQRController
     // @User: Standard
     GSCALAR(nav_controller,          "NAV_CONTROLLER",   AP_Navigation::CONTROLLER_L1),
 
@@ -1088,7 +1088,11 @@ const AP_Param::Info Plane::var_info[] = {
     // @Group: LAND_
     // @Path: ../libraries/AP_Landing/AP_Landing.cpp
     GOBJECT(landing, "LAND_", AP_Landing),
-
+    
+    // @Group: NAVLQR_
+    // @Path: ../libraries/AP_LQR_Control/AP_LQR_Control.cpp
+    GOBJECT(LQR_controller, "NAVLQR_", AP_LQR_Control),
+    
 #if OSD_ENABLED
     // @Group: OSD
     // @Path: ../libraries/AP_OSD/AP_OSD.cpp
