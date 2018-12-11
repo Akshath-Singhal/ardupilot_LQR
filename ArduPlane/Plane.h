@@ -64,6 +64,7 @@
 #include <AP_Scheduler/PerfInfo.h>                  // loop perf monitoring
 
 #include <AP_Navigation/AP_Navigation.h>
+#include <AP_LQR_Control/AP_LQR_Control.h>
 #include <AP_L1_Control/AP_L1_Control.h>
 #include <AP_RCMapper/AP_RCMapper.h>        // RC input mapping library
 
@@ -230,6 +231,7 @@ private:
 
     AP_TECS TECS_controller{ahrs, aparm, landing};
     AP_L1_Control L1_controller{ahrs, &TECS_controller};
+    AP_LQR_Control LQR_controller{ahrs, &TECS_controller};
 
     // Attitude to servo controllers
     AP_RollController rollController{ahrs, aparm, DataFlash};
