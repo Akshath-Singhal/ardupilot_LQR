@@ -22,6 +22,7 @@ import textwrap
 import time
 import shlex
 
+from MAVProxy.modules.lib import mp_util
 from pysim import vehicleinfo
 
 # List of open terminal windows for macosx
@@ -423,6 +424,7 @@ def find_location_by_name(autotest, locname):
     locations_userpath = os.environ.get('ARDUPILOT_LOCATIONS',
                                         get_user_locations_path())
     locations_filepath = os.path.join(autotest, "locations.txt")
+    swarm_init_filepath = os.path.join(autotest, "locations.txt")
     comment_regex = re.compile("\s*#.*")
     for path in [locations_userpath, locations_filepath]:
         if not os.path.isfile(path):
@@ -436,6 +438,23 @@ def find_location_by_name(autotest, locname):
                     continue
                 (name, loc) = line.split("=")
                 if name == locname:
+                    if cmd_opts.swarm :
+                        (lat, lon, alt, heading)=loc.split(",")
+                        for path2 in [swarm_init_filepath]:
+                            if os.path.isfile(path2):
+                                with open(path2,'r') as swd:
+                                    for lines in swd:
+                                        if len(lines) == 0:
+                                            continue
+                                        (instance, offset) = lines.split("=")
+                                        if ((int)(instance) == (int)cmd_opts.instance):
+                                            (dist, heading) = offset.split(",")
+                                            g=mp_util.gps_newpos((float)(lat), (float)(lon), (float)(heading), (float)(dist))
+                                            loc=str(g[0])+","+str(g[1])+","+str(alt)+","+str(heading)
+                                            return loc
+                                g=mp_util.gps_newpos((float)(lat), (float)(lon), 90, 20*(int)(cmd_opts.instance))    
+                                loc=str(g[0])+","+str(g[1])+","+str(alt)+","+str(heading)
+                                return loc
                     return loc
 
     print("Failed to find location (%s)" % cmd_opts.location)
@@ -625,7 +644,7 @@ def start_mavproxy(opts, stuff):
             cmd.extend(["--sitl", simout_port])
 
     if not opts.no_extra_ports:
-        ports = [p + 10 * cmd_opts.instance for p in [14550, 14551]]
+        ports = [p + 10 * cmd_opts.instance for p in [14550, 14551, 18550]]
         for port in ports:
             if os.path.isfile("/ardupilot.vagrant"):
                 # We're running inside of a vagrant guest; forward our
@@ -804,6 +823,10 @@ group_sim.add_option("-I", "--instance",
                      default=0,
                      type='int',
                      help="instance of simulator")
+group_sim.add_option("-Z","--swarm",
+                     action='store_true',
+                     default=False,
+                     help="Use when implementing swarm")
 group_sim.add_option("-V", "--valgrind",
                      action='store_true',
                      default=False,
